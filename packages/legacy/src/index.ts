@@ -32,7 +32,7 @@ if (typeof window !== 'undefined') {
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CBFY2CYWMUYWADQNEZMW22ORR5FIEOLHK7A7M6LHYOD3M52YM4IJLIFZ",
+    contractId: "CDI4ZCDFKSP2EYIBGRU376XXSEAMZZBJLZGTSNKLGGAAMTVPTC6F34N2",
   }
 } as const
 
@@ -143,7 +143,7 @@ export interface Client {
   /**
    * Construct and simulate a param_test transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  param_test: ({from}: {from:string}, options?: {
+  param_test: ({from}: {from: string}, options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */

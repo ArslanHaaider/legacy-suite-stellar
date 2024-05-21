@@ -1,12 +1,20 @@
-import { Address, Contract, ContractSpec} from '@stellar/stellar-sdk';
-import { Benificary } from './src';
+import { Address, Contract,contract} from '@stellar/stellar-sdk'; 
+import { i128 } from './packages/legacy/src';
+// import { Benificary } from './packages/legacy';
+const { Spec }  = contract
 
+ interface Benificary {
+  benificary: Address;
+  token: Address;
+  value: i128;
+}
+type Spec = any;
 export class legacyContract extends Contract {
-  spec: ContractSpec;
+  spec: Spec;
 
   constructor(address: string) {
     super(address);
-    this.spec = new ContractSpec(["AAAAAQAAAAAAAAAAAAAACkJlbmlmaWNhcnkAAAAAAAMAAAAAAAAACmJlbmlmaWNhcnkAAAAAABMAAAAAAAAABXRva2VuAAAAAAAAEwAAAAAAAAAFdmFsdWUAAAAAAAAL",
+    this.spec = new Spec(["AAAAAQAAAAAAAAAAAAAACkJlbmlmaWNhcnkAAAAAAAMAAAAAAAAACmJlbmlmaWNhcnkAAAAAABMAAAAAAAAABXRva2VuAAAAAAAAEwAAAAAAAAAFdmFsdWUAAAAAAAAL",
     "AAAAAQAAAAAAAAAAAAAABWFkbWluAAAAAAAAAQAAAAAAAAAGYWRtaW5zAAAAAAPqAAAD7gAAACA=",
     "AAAAAQAAAAAAAAAAAAAABVBhcmFtAAAAAAAAAwAAAAAAAAAKYmVuaWZpY2FyeQAAAAAAEwAAAAAAAAAFdG9rZW4AAAAAAAATAAAAAAAAAAV2YWx1ZQAAAAAAAAs=",
     "AAAAAAAAAAAAAAAJYWRkX2FkbWluAAAAAAAAAQAAAAAAAAAMYWRtaW5fYWRyZXNzAAAD7gAAACAAAAAA",
@@ -34,9 +42,9 @@ export class legacyContract extends Contract {
   public claim_asset(  
     from: Address,
     claimer: Address,
-    message: Array<any>,
+    message:Uint8Array,
     address:Uint8Array,
-    signature: Array<64>){
+    signature:Uint8Array){
     const invokeArgs = this.spec.funcArgsToScVals('claim_asset',{
       from:from,
       claimer:claimer,

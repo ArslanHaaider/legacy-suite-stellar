@@ -41,14 +41,31 @@ pub fn add_asset(
         panic!("no enough amount present")
     }
     //creating default map in case not a new benificiary where key is benificary address
-    let default_map: Map<Address, Vec<(Address, i128)>> = Map::new(&env);
+    let default_map: Map<Address, Vec<(Address, i128,bool)>> = Map::new(&env);
     //fetching the will map which has all the information regard to benificiary
-    let mut will_map: Map<Address, Vec<(Address, i128)>> =
+    let mut will_map: Map<Address, Vec<(Address, i128,bool)>> =
         env.storage().persistent().get(&from).unwrap_or(default_map);
     //getting curruent information about the benificiary and allowed assets
     let mut benificary_assets = will_map.get(benificary.clone()).unwrap_or(vec![&env]);
-    //specifying the amount for that token for curruent benificary
-    benificary_assets.append(&vec![&env, (token_address, amount)]);
+    let claimed = false;
+    // for assets in benificary_assets.clone() {
+    //     let (prevToken,prevAmount,prevClaimed) = assets;
+    //     match prevToken.clone(){
+    //         (token_address)=>{
+    //             let index = match benificary_assets.first_index_of((prevToken.clone(),prevAmount,prevClaimed)) {
+    //                 Some(index)=>{
+    //                     index
+    //                 }
+    //                 None=>{
+    //                     0
+    //                 }
+    //             };
+    //             benificary_assets.set(index,(prevToken,amount,false));
+    //         }   
+    //     }
+    // }
+    benificary_assets.append(&vec![&env, (token_address, amount,claimed)]);
+     //specifying the amount for that token for curruent benificary
     //adding the information to will map
     will_map.set(benificary, benificary_assets);
     //adding the new benificary and its asset to contract storage
@@ -92,6 +109,7 @@ impl Legacy {
         address: BytesN<32>,
         signature: BytesN<64>,
     ) {
+
         claimer.require_auth();
         let admins_list = env
             .storage()
@@ -103,25 +121,34 @@ impl Legacy {
         //than we will see if this is even a admin or not!
         admins_list.admins.contains(&address);
         if env.storage().persistent().has(&from) {
-            let default_map: Map<Address, Vec<(Address, i128)>> = Map::new(&env);
+            let default_map: Map<Address, Vec<(Address, i128,bool)>> = Map::new(&env);
             //fetching the will map which has all the information regard to benificiary
-            let mut will_map: Map<Address, Vec<(Address, i128)>> =
+            let mut will_map: Map<Address, Vec<(Address, i128,bool)>> =
                 env.storage().persistent().get(&from).unwrap_or(default_map);
             // //find out if claimer is the benificary or not
             assert_eq!(will_map.contains_key(claimer.clone()), true);
             // //getting curruent information about the benificiary and allowed assets
-            let mut benificary_assets: Vec<(Address, i128)> =
+            let mut benificary_assets: Vec<(Address, i128,bool)> =
                 will_map.get(claimer.clone()).unwrap_or(vec![&env]);
             //will run a loop over all assets assingeed to the
-            for assets in benificary_assets {
-                let (token_Addresss, amount) = assets;
+            for assets in benificary_assets.clone() {
+                let (token_Addresss, amount,claimed) = assets;
                 let event = env.events();
                 let topic = ("transfer", &env.current_contract_address(), &claimer);
+                let index = match benificary_assets.first_index_of((token_Addresss.clone(),amount,claimed)) {
+                    Some(index)=>{
+                        index
+                    }
+                    None=>{
+                        0
+                    }
+                };
+                benificary_assets.set(index,(token_Addresss.clone(),amount,true));
                 let client = token::Client::new(&env, &token_Addresss);
                 client.transfer(&env.current_contract_address(), &claimer, &amount);
                 event.publish(topic, amount);
             }
-            will_map.remove(claimer);
+            will_map.set(claimer, benificary_assets);
             env.storage().persistent().set(&from, &will_map);
         } else {
             // Err(Error::NO_WILL_EXIST)
