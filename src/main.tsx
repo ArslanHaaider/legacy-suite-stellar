@@ -9,13 +9,17 @@ import './index.css'
 import ErrorPage from './Error.tsx';
 import User from './components/User.tsx';
 import MainMenue from './components/MainMenu.tsx';
-import { Err } from '@stellar/stellar-sdk/contract';
+// import { Err } from '@stellar/stellar-sdk/contract';
 import Benificiary from './components/Benificiary.tsx';
+import WalletProvider from './context/provider/walletProvider.tsx';
+import Claimed from './components/Claimed.tsx';
+import UnClaimed from './components/UnClaimed.tsx';
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element:<App/>,
-    errorElement:<ErrorPage/>,
+    element: <WalletProvider><App/></WalletProvider>,
+    errorElement:<ErrorPage/>,  
     children:[{
       path:"/user",
       element:<User/>,
@@ -27,14 +31,23 @@ const router = createBrowserRouter([
     },{
       path:"/benificiary",
       element:<Benificiary/>,
-      errorElement:<ErrorPage/>
+      errorElement:<ErrorPage/>,
+      children:[{
+        path:'/benificiary/Claimed',
+        element:<Claimed/>,
+        errorElement:<ErrorPage/>,
+    },{
+        path:"/benificiary/UnClaimed",
+        element:<UnClaimed/>,
+        errorElement:<ErrorPage/>,
+    }]
     }
   ]
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+ 
     <RouterProvider router={router} />
-  </React.StrictMode>,
+  
 )

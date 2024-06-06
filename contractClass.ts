@@ -4,8 +4,8 @@ import { i128 } from './packages/legacy/src';
 const { Spec }  = contract
 
  interface Benificary {
-  benificary: Address;
-  token: Address;
+  benificary: String;
+  token: String;
   value: i128;
 }
 type Spec = any;
@@ -16,12 +16,11 @@ export class legacyContract extends Contract {
     super(address);
     this.spec = new Spec(["AAAAAQAAAAAAAAAAAAAACkJlbmlmaWNhcnkAAAAAAAMAAAAAAAAACmJlbmlmaWNhcnkAAAAAABMAAAAAAAAABXRva2VuAAAAAAAAEwAAAAAAAAAFdmFsdWUAAAAAAAAL",
     "AAAAAQAAAAAAAAAAAAAABWFkbWluAAAAAAAAAQAAAAAAAAAGYWRtaW5zAAAAAAPqAAAD7gAAACA=",
-    "AAAAAQAAAAAAAAAAAAAABVBhcmFtAAAAAAAAAwAAAAAAAAAKYmVuaWZpY2FyeQAAAAAAEwAAAAAAAAAFdG9rZW4AAAAAAAATAAAAAAAAAAV2YWx1ZQAAAAAAAAs=",
+    "AAAAAQAAAAAAAAAAAAAABkFzc2V0cwAAAAAABAAAAAAAAAAHY2xhaW1lZAAAAAABAAAAAAAAAARmcm9tAAAAEwAAAAAAAAAFdG9rZW4AAAAAAAATAAAAAAAAAAV2YWx1ZQAAAAAAAAs=",
     "AAAAAAAAAAAAAAAJYWRkX2FkbWluAAAAAAAAAQAAAAAAAAAMYWRtaW5fYWRyZXNzAAAD7gAAACAAAAAA",
     "AAAAAAAAAAAAAAASYWRkX211bHRpcGxlX2Fzc2V0AAAAAAACAAAAAAAAAARkYXRhAAAD6gAAB9AAAAAKQmVuaWZpY2FyeQAAAAAAAAAAAARmcm9tAAAAEwAAAAA=",
-    "AAAAAAAAAAAAAAALY2xhaW1fYXNzZXQAAAAABQAAAAAAAAAEZnJvbQAAABMAAAAAAAAAB2NsYWltZXIAAAAAEwAAAAAAAAAHbWVzc2FnZQAAAAAOAAAAAAAAAAdhZGRyZXNzAAAAA+4AAAAgAAAAAAAAAAlzaWduYXR1cmUAAAAAAAPuAAAAQAAAAAA=",
-    "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ==",
-    "AAAAAAAAAAAAAAAKcGFyYW1fdGVzdAAAAAAAAQAAAAAAAAAEZnJvbQAAABMAAAABAAAAAQ=="]);
+    "AAAAAAAAAAAAAAALY2xhaW1fYXNzZXQAAAAABQAAAAAAAAAEZnJvbQAAABMAAAAAAAAAB2NsYWltZXIAAAAAEwAAAAAAAAAHbWVzc2FnZQAAAAAOAAAAAAAAAAdhZGRyZXNzAAAAA+4AAAAgAAAAAAAAAAlzaWduYXR1cmUAAAAAAAPuAAAAQAAAAAA=", 
+    "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ=="]);
   }
   public param_test(from:Address) {
     const invokeArgs = this.spec.funcArgsToScVals('param_test', {
@@ -33,8 +32,10 @@ export class legacyContract extends Contract {
   public add_multiple(data:Array<Benificary>,from:Address){
     const invokeArgs = this.spec.funcArgsToScVals('add_multiple_asset',{
         data:data,
-        from:from
+        from:from ,
     })
+
+    // console.log(invokeArgs,"from add multippe")
     const operation = this.call('add_multiple_asset',...invokeArgs);
     return operation;
 
@@ -52,7 +53,7 @@ export class legacyContract extends Contract {
       address:address,
       signature:signature
     })
-    console.log(invokeArgs);
+    // console.log(invokeArgs);
     const operation = this.call('claim_asset',...invokeArgs);
     return operation
     }

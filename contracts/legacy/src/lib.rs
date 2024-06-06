@@ -1,28 +1,46 @@
 #![no_std]
 
+
+
 use soroban_sdk::{
-    contract, contractimpl, contracttype, log, symbol_short, token, vec, xdr::{ScAddress, ScVal, Value}, Address, Bytes, BytesN, Env, Map, String, Symbol, Val, Vec
-};
+    contract, contractimpl, contracttype, symbol_short, token, vec, Address, Bytes, BytesN, Env, Map, Symbol, Vec};
+
+
+
+
 const ADMIN: Symbol = symbol_short!("ADMIN");
+const BENI: Symbol = symbol_short!("BENI");
+
 #[contract]
+
 pub struct Legacy;
 
 #[contracttype]
 pub struct Benificary {
-  pub  token: Address,
-  pub  benificary: Address,
-  pub  value: i128,
+    pub token: Address,
+    pub benificary: Address,
+    pub value: i128,
+}
+
+#[contracttype]
+pub struct BenificaryStorage{
+    pub token: Address,
+    pub benificary: Address,
+    pub value: i128,
+    pub claimed:bool,
 }
 #[contracttype]
-pub struct admin {
+pub struct Admin {
     admins: Vec<BytesN<32>>,
 }
 #[contracttype]
-pub struct Param{
+pub struct Asset{
     token: Address,
-    benificary: Address,
+    from: Address,
     value: i128,
+    claimed: bool,
 }
+
 pub fn add_asset(
     env: Env,
     token_address: Address,
@@ -30,54 +48,60 @@ pub fn add_asset(
     benificary: Address,
     amount: i128,
 ) {
-    let client = token::Client::new(&env, &token_address);
-    let balance = client.balance(&from);
-    if balance > amount {
-        let event = env.events();
-        let topic = ("transfer", &from, &env.current_contract_address());
-        client.transfer(&from, &env.current_contract_address(), &amount);
-        event.publish(topic, amount);
-    } else {
-        panic!("no enough amount present")
-    }
-    //creating default map in case not a new benificiary where key is benificary address
-    let default_map: Map<Address, Vec<(Address, i128,bool)>> = Map::new(&env);
-    //fetching the will map which has all the information regard to benificiary
-    let mut will_map: Map<Address, Vec<(Address, i128,bool)>> =
-        env.storage().persistent().get(&from).unwrap_or(default_map);
-    //getting curruent information about the benificiary and allowed assets
-    let mut benificary_assets = will_map.get(benificary.clone()).unwrap_or(vec![&env]);
     let claimed = false;
-    // for assets in benificary_assets.clone() {
-    //     let (prevToken,prevAmount,prevClaimed) = assets;
-    //     match prevToken.clone(){
-    //         (token_address)=>{
-    //             let index = match benificary_assets.first_index_of((prevToken.clone(),prevAmount,prevClaimed)) {
-    //                 Some(index)=>{
-    //                     index
-    //                 }
-    //                 None=>{
-    //                     0
-    //                 }
-    //             };
-    //             benificary_assets.set(index,(prevToken,amount,false));
-    //         }   
+    let client = token::Client::new(&env, &token_address);
+    let event = env.events();
+    let topic = ("testament", &from, &benificary, claimed);
+    client.transfer(&from, &env.current_contract_address(), &amount);
+    event.publish(topic, amount);
+
+    let default_map: Map<Address, Vec<BenificaryStorage>> = Map::new(&env);
+    let default_asset:  Map<Address,Vec<(Address,Address,i128,bool)>> = Map::new(&env);
+    let default_asset_array:Vec<(Address,Address,i128,bool)> = Vec::new(&env);
+    let mut will_map: Map<Address, Vec<BenificaryStorage>> = env.storage().persistent().get(&from).unwrap_or(default_map);
+    let mut asset_map: Map<Address,Vec<(Address,Address,i128,bool)>> = env
+        .storage()
+        .persistent()
+        .get(&BENI)
+        .unwrap_or(default_asset);
+
+    let mut benificary_assets: Vec<BenificaryStorage> = will_map.get(benificary.clone()).unwrap_or(vec![&env]);
+
+    // let mut found = false;
+    // for (i, (prevToken, prevAmount, prevClaimed)) in benificary_assets.iter().enumerate() {
+    //     if prevToken == token_address {
+    //         benificary_assets.set(i as u32, (prevToken, prevAmount + amount, false));
+    //         found = true;
+    //         break;
     //     }
     // }
-    benificary_assets.append(&vec![&env, (token_address, amount,claimed)]);
-     //specifying the amount for that token for curruent benificary
-    //adding the information to will map
-    will_map.set(benificary, benificary_assets);
-    //adding the new benificary and its asset to contract storage
-    env.storage().persistent().set(&from, &will_map);
-}
 
+    // if !found {
+
+        let beneficiary_struct = BenificaryStorage{token:token_address.clone(),benificary:benificary.clone(),value:amount,claimed:false};
+
+        benificary_assets.append(&vec![&env, beneficiary_struct]);
+        
+        let mut asset_array: Vec<(Address, Address, i128, bool)> =  asset_map.get(
+            benificary.clone()).unwrap_or(default_asset_array);
+        asset_array.append(&vec![&env,(token_address.clone(),from.clone(),amount,claimed)]);
+
+
+
+
+    will_map.set(benificary.clone(), benificary_assets);
+    asset_map.set(benificary, asset_array.clone());
+    env.storage().persistent().set(&from, &will_map);
+    env.storage().persistent().set(&BENI, &asset_map);
+
+}
+    
 #[contractimpl]
 impl Legacy {
     pub fn add_admin(env: Env, admin_adress: BytesN<32>) {
         let copy_admin: BytesN<32> = admin_adress.clone();
-        let mut admin_list: admin = env.storage().persistent().get(&ADMIN).unwrap_or({
-            admin {
+        let mut admin_list: Admin = env.storage().persistent().get(&ADMIN).unwrap_or({
+            Admin {
                 admins: vec![&env, admin_adress],
             }
         });
@@ -86,7 +110,7 @@ impl Legacy {
         env.storage().persistent().set(&ADMIN, &admin_list);
     }
 
-    pub fn add_multiple_asset(env: Env, data: Vec<Benificary>, from: Address){
+    pub fn add_multiple_asset(env: Env, data: Vec<Benificary>, from: Address) {
         from.require_auth();
         for benificary in data {
             let token_address = benificary.token;
@@ -109,45 +133,73 @@ impl Legacy {
         address: BytesN<32>,
         signature: BytesN<64>,
     ) {
-
         claimer.require_auth();
         let admins_list = env
             .storage()
             .persistent()
             .get(&ADMIN)
-            .unwrap_or(admin { admins: vec![&env] });
+            .unwrap_or(Admin { admins: vec![&env] });
         //first verifies the admin signatures
         env.crypto().ed25519_verify(&address, &message, &signature);
         //than we will see if this is even a admin or not!
         admins_list.admins.contains(&address);
         if env.storage().persistent().has(&from) {
-            let default_map: Map<Address, Vec<(Address, i128,bool)>> = Map::new(&env);
+            let default_map: Map<Address, Vec<BenificaryStorage>> = Map::new(&env);
+            let default_asset:  Map<Address,Vec<(Address,Address,i128,bool)>> = Map::new(&env);
+            let default_asset_array:Vec<(Address,Address,i128,bool)> = Vec::new(&env);
             //fetching the will map which has all the information regard to benificiary
-            let mut will_map: Map<Address, Vec<(Address, i128,bool)>> =
+            let mut will_map: Map<Address, Vec<BenificaryStorage>> =
                 env.storage().persistent().get(&from).unwrap_or(default_map);
+
             // //find out if claimer is the benificary or not
             assert_eq!(will_map.contains_key(claimer.clone()), true);
             // //getting curruent information about the benificiary and allowed assets
-            let mut benificary_assets: Vec<(Address, i128,bool)> =
+            let mut benificary_assets: Vec<BenificaryStorage> =
                 will_map.get(claimer.clone()).unwrap_or(vec![&env]);
-            //will run a loop over all assets assingeed to the
-            for assets in benificary_assets.clone() {
-                let (token_Addresss, amount,claimed) = assets;
+            //getting benificiary asset for storage purposes stored with key as claimer address:
+            let mut asset_map:  Map<Address,Vec<(Address,Address,i128,bool)>>= 
+            env.storage().persistent().get(&BENI).unwrap_or(default_asset);
+  
+
+            let mut asset_array =  asset_map.get(
+                claimer.clone()).unwrap_or(default_asset_array);
+            // will run a loop over all assets assingeed to the
+            for asset in benificary_assets.clone() {
+                let token_Address = asset.token;
+                let amount= asset.value;
+                let claimed = asset.claimed;
+                let benificiary_Address = asset.benificary;
                 let event = env.events();
-                let topic = ("transfer", &env.current_contract_address(), &claimer);
-                let index = match benificary_assets.first_index_of((token_Addresss.clone(),amount,claimed)) {
-                    Some(index)=>{
-                        index
-                    }
-                    None=>{
-                        0
-                    }
-                };
-                benificary_assets.set(index,(token_Addresss.clone(),amount,true));
-                let client = token::Client::new(&env, &token_Addresss);
-                client.transfer(&env.current_contract_address(), &claimer, &amount);
-                event.publish(topic, amount);
+                let index =  benificary_assets.first_index_of(BenificaryStorage{
+                    benificary:benificiary_Address.clone(),
+                    token:token_Address.clone(),
+                    claimed:claimed,
+                    value:amount
+                });
+                let index_value: u32 = index.unwrap_or(0);
+                benificary_assets.set(index_value, (BenificaryStorage{
+                    benificary:benificiary_Address.clone(),
+                    token:token_Address.clone(),
+                    claimed:true,
+                    value:amount
+                }));
+                let client = token::Client::new(&env, &token_Address);
+                if !claimed{
+                    client.transfer(&env.current_contract_address(), &claimer, &amount);
+                    let topic = ("testament", &from, &claimer, true);
+                    event.publish(topic, amount);
+                }
             }
+            for asset in asset_array.clone() {
+               let  (token_address,from,amount,claimed) = asset;
+               let  claimed_update = true;
+                let index = asset_array.first_index_of((token_address.clone(),from.clone(),amount,claimed));
+                let index_value: u32 = index.unwrap_or(0);
+                asset_array.set(index_value,(token_address,from,amount,claimed_update));
+            }
+            
+            asset_map.set(claimer.clone(),asset_array);
+            env.storage().persistent().set(&BENI, &asset_map);
             will_map.set(claimer, benificary_assets);
             env.storage().persistent().set(&from, &will_map);
         } else {
@@ -155,12 +207,8 @@ impl Legacy {
         }
     }
     //to mimic the signiing of the signature
-    pub fn test_admin_sign(env: Env) -> bool {
+    pub fn test_admin_sign(_env: Env) -> bool {
         true
     }
-    //just to test the issue I'm currently facing with calling client sided bindings
-    pub fn param_test(env:Env,from:Address)-> bool{
-        true
-    }   
 }
 mod test;

@@ -64,6 +64,8 @@ function deploy_all() {
 
   wasmFiles.forEach(wasmFile => {
     deploy(`${dirname}/target/wasm32-unknown-unknown/release/${wasmFile}`);
+    // console.log(dirname+'/target/wasm32-unknown-unknown/release/'+wasmFile);
+
   });
 }
 

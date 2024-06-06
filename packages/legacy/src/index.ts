@@ -32,7 +32,7 @@ if (typeof window !== 'undefined') {
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CDI4ZCDFKSP2EYIBGRU376XXSEAMZZBJLZGTSNKLGGAAMTVPTC6F34N2",
+    contractId: "CBARWMQEQYQOFJRKVOTPUYC5CGHZOIMHGE6D63RRJBVRWQ2DYW6VJWYT",
   }
 } as const
 
@@ -44,13 +44,22 @@ export interface Benificary {
 }
 
 
-export interface admin {
+export interface BenificaryStorage {
+  benificary: string;
+  claimed: boolean;
+  token: string;
+  value: i128;
+}
+
+
+export interface Admin {
   admins: Array<Buffer>;
 }
 
 
-export interface Param {
-  benificary: string;
+export interface Asset {
+  claimed: boolean;
+  from: string;
   token: string;
   value: i128;
 }
@@ -140,38 +149,18 @@ export interface Client {
     simulate?: boolean;
   }) => Promise<AssembledTransaction<boolean>>
 
-  /**
-   * Construct and simulate a param_test transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
-   */
-  param_test: ({from}: {from: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<boolean>>
-
 }
 export class Client extends ContractClient {
   constructor(public readonly options: ContractClientOptions) {
     super(
       new ContractSpec([ "AAAAAQAAAAAAAAAAAAAACkJlbmlmaWNhcnkAAAAAAAMAAAAAAAAACmJlbmlmaWNhcnkAAAAAABMAAAAAAAAABXRva2VuAAAAAAAAEwAAAAAAAAAFdmFsdWUAAAAAAAAL",
-        "AAAAAQAAAAAAAAAAAAAABWFkbWluAAAAAAAAAQAAAAAAAAAGYWRtaW5zAAAAAAPqAAAD7gAAACA=",
-        "AAAAAQAAAAAAAAAAAAAABVBhcmFtAAAAAAAAAwAAAAAAAAAKYmVuaWZpY2FyeQAAAAAAEwAAAAAAAAAFdG9rZW4AAAAAAAATAAAAAAAAAAV2YWx1ZQAAAAAAAAs=",
+        "AAAAAQAAAAAAAAAAAAAAEUJlbmlmaWNhcnlTdG9yYWdlAAAAAAAABAAAAAAAAAAKYmVuaWZpY2FyeQAAAAAAEwAAAAAAAAAHY2xhaW1lZAAAAAABAAAAAAAAAAV0b2tlbgAAAAAAABMAAAAAAAAABXZhbHVlAAAAAAAACw==",
+        "AAAAAQAAAAAAAAAAAAAABUFkbWluAAAAAAAAAQAAAAAAAAAGYWRtaW5zAAAAAAPqAAAD7gAAACA=",
+        "AAAAAQAAAAAAAAAAAAAABUFzc2V0AAAAAAAABAAAAAAAAAAHY2xhaW1lZAAAAAABAAAAAAAAAARmcm9tAAAAEwAAAAAAAAAFdG9rZW4AAAAAAAATAAAAAAAAAAV2YWx1ZQAAAAAAAAs=",
         "AAAAAAAAAAAAAAAJYWRkX2FkbWluAAAAAAAAAQAAAAAAAAAMYWRtaW5fYWRyZXNzAAAD7gAAACAAAAAA",
         "AAAAAAAAAAAAAAASYWRkX211bHRpcGxlX2Fzc2V0AAAAAAACAAAAAAAAAARkYXRhAAAD6gAAB9AAAAAKQmVuaWZpY2FyeQAAAAAAAAAAAARmcm9tAAAAEwAAAAA=",
         "AAAAAAAAAAAAAAALY2xhaW1fYXNzZXQAAAAABQAAAAAAAAAEZnJvbQAAABMAAAAAAAAAB2NsYWltZXIAAAAAEwAAAAAAAAAHbWVzc2FnZQAAAAAOAAAAAAAAAAdhZGRyZXNzAAAAA+4AAAAgAAAAAAAAAAlzaWduYXR1cmUAAAAAAAPuAAAAQAAAAAA=",
-        "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ==",
-        "AAAAAAAAAAAAAAAKcGFyYW1fdGVzdAAAAAAAAQAAAAAAAAAEZnJvbQAAABMAAAABAAAAAQ==" ]),
+        "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ==" ]),
       options
     )
   }
@@ -179,7 +168,6 @@ export class Client extends ContractClient {
     add_admin: this.txFromJSON<null>,
         add_multiple_asset: this.txFromJSON<null>,
         claim_asset: this.txFromJSON<null>,
-        test_admin_sign: this.txFromJSON<boolean>,
-        param_test: this.txFromJSON<boolean>
+        test_admin_sign: this.txFromJSON<boolean>
   }
 }

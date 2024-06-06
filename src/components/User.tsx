@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import FreighterComponent from "./ConnectFreighter";
 import AddAsset from "./AddAsset";
 import { Address, SorobanRpc, xdr } from "@stellar/stellar-sdk";
+import ClaimAsset from "./AddAdmin.js";
 const User = () => {
   const [address,setAddress] = useState('');
   const handleAddress =(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -11,10 +12,11 @@ const User = () => {
   console.log("re rendered again")
   return (
 
-        <div className="w-full h-[80vh] flex flex-col items-center justify-center">
-          <h1 className="text-lg font-bold text uppercase">Add assets for benificary</h1>    
+        <div className="w-full h-[100vh] ">
+          {/* <h1 className="text-lg font-bold text-center uppercase">Add assets for benificary</h1>     */}
           <AddAsset/>
         </div>  
+        
   );
 };
 

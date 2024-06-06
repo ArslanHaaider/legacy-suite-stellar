@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { isAllowed, setAllowed, getUserInfo, isConnected, getPublicKey } from "@stellar/freighter-api";
+import React, { useState, useEffect, useContext } from "react";
+import { isAllowed, setAllowed, getUserInfo, isConnected, getPublicKey, requestAccess } from "@stellar/freighter-api";
+import WalletContext from "../context/walletContext";
 
 function FreighterComponent() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [publicKey, setPublicKey] = useState("");
   const [freighterAllowed, setFreighterAllowed] = useState(false);
+  const walletContext = useContext(WalletContext);
+
+  if (!walletContext) {
+    throw new Error('FreighterComponent must be used within a WalletProvider');
+  }
+
+  const { walletLogin, setWalletLogin, publicKey, setPublicKey } = walletContext;
 
   useEffect(() => {
     async function checkFreighterStatus() {
@@ -12,7 +18,7 @@ function FreighterComponent() {
         setFreighterAllowed(true);
         const pk = await getPk();
         if (pk) {
-          setLoggedIn(true);
+          setWalletLogin(true);
           setPublicKey(pk);
         }
       } else {
@@ -20,7 +26,7 @@ function FreighterComponent() {
       }
     }
     checkFreighterStatus();
-  }, []);
+  }, [setWalletLogin, setPublicKey]);
 
   async function getPk() {
     const { publicKey } = await getUserInfo();
@@ -28,41 +34,42 @@ function FreighterComponent() {
   }
 
   async function handleConnectClick() {
-      try{
-        if(!await isConnected()){
-          alert("install Freighter wallet first !")
-        }
-        else{
-          if(await isAllowed()){
-            setLoggedIn(true)
+    try {
+      if (!await isConnected()) {
+        alert("Install Freighter wallet first!");
+      } else {
+        if (await isAllowed()) {
+          setWalletLogin(true);
+          const pk = await getPublicKey();
+          setPublicKey(pk);
+        } else {
+          const isAllowed = await setAllowed();
+          if (isAllowed) {
+            setWalletLogin(true);
             const pk = await getPublicKey();
             setPublicKey(pk);
           }
-          else{
-            const isAllowed = await setAllowed();
-            if(isAllowed){
-              setLoggedIn(true);
-              const pk = await getPublicKey();
-              setPublicKey(pk);
-            }
-          }
         }
-      }catch(error){  
-        alert(error);
       }
+    } catch (error) {
+      alert(error);
+    }
   }
+
   const disConnect = () => {
-    setLoggedIn(false);
+    setWalletLogin(false);
+    console.log(walletLogin); 
   };
+
   return (
     <div id="freighter-wrap" className="wrap" aria-live="polite">
-      {loggedIn ? (
+      {walletLogin ? (
         <div
-          className="dropdown bg-indigo-500 rounded-md p-2 border "
+          className="dropdown bg-indigo-500 rounded-md p-2 border font-semibold   text-black bg-button"
           title={publicKey}
         >
-          <div tabIndex={0} role="button" className=" bg-indigo-500">
-          {publicKey.slice(0,5)+"....."+publicKey.slice(-5)}
+          <div tabIndex={0} role="button" className="text-[#062044] ">
+            {publicKey.slice(0, 5) + "....." + publicKey.slice(-5)}
           </div>
           <ul
             tabIndex={0}
@@ -75,14 +82,14 @@ function FreighterComponent() {
         </div>
       ) : (
         <div className="ellipsis">
-            <button
-              data-connect
-              onClick={handleConnectClick}
-              disabled={loggedIn}
-              className="bg-indigo-500 rounded-md p-2 "
-            >
-              Connect
-            </button>
+          <button
+            data-connect
+            onClick={handleConnectClick}
+            disabled={walletLogin}
+            className="btn btn-info bg-button text-legacyBlue"
+          >
+            Connect
+          </button>
         </div>
       )}
     </div>
