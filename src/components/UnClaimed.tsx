@@ -19,14 +19,15 @@ import {
 import { useEffect, useState } from "react";
 import { legacyContract } from "../../contractClass";
 import axios from "axios";
-import { AssetMap } from "../assetMap";
+import { AssetMap } from "../utility/assetMap";
+import { AssetType, Codes, ValueItem } from "./types/benificiary";
 const UnClaimed = () => {
   let data;
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ visible: false, type: "", message: "" });
-  let [values, setValues] = useState([]);
-  const [assetCodes, setAssetCodes] = useState({});
-  const [assetCodes2, setAssetCodes2] = useState({});
+  let [values, setValues] = useState<AssetType[]>([]);
+  const [assetCodes, setAssetCodes] = useState<Codes>({});
+  const [assetCodes2, setAssetCodes2] = useState<Codes>({});
   useEffect(() => {
     const fetchAssets = async () => {
       const server = new rpc.Server("https://soroban-testnet.stellar.org:443", {
@@ -41,7 +42,7 @@ const UnClaimed = () => {
       );
       let value = scValToNative(data.val.contractData().val());
       value = value[publicKey];
-      const result = value.map((item) => ({
+      const result = value.map((item: ValueItem) => ({
         token: item[0],
         from: item[1],
         value: item[2],
@@ -57,8 +58,8 @@ const UnClaimed = () => {
   useEffect(() => {
     const fetchAssetCodes = async () => {
       setLoading(true);
-      const codes = {};
-      const codes2 = {};
+      const codes: Codes = {};
+      const codes2: Codes = {};
       for (const asset of values) {
         const code = await getAssetCode(asset.token);
         codes[asset.token] = code[0] === "native" ? "XLM" : code[0];
@@ -240,9 +241,10 @@ const UnClaimed = () => {
       });
     }
   };
+
   const groupedByAddress =
     values.length > 0
-      ? values.reduce((acc, asset) => {
+      ? values.reduce<{ [key: string]: AssetType[] }>((acc, asset) => {
           if (!acc[asset.from]) {
             acc[asset.from] = [];
           }
@@ -265,13 +267,11 @@ const UnClaimed = () => {
               {unClaimed.length > 0 ? (
                 unClaimed.map((assets, index) => (
                   <div key={index} className="address-group card ">
-                    {assets.some((asset) => !asset.claimed) && (
+                    {assets.some((asset: AssetType) => !asset.claimed) && (
                       <div className="  w-9/12 mt-4 card-body border border-[#EFF0F1] ml-5 rounded-md text-[#1D232A] font-mono bg-[#FDFDFD]">
                         <div className=" text-2xl font-medium bg-[#ffff]">
-                        You have unclaimed Assets from <br />
-                        <mark>
-                        {assets[0].from}
-                        </mark>
+                          You have unclaimed Assets from <br />
+                          <mark>{assets[0].from}</mark>
                         </div>
                         <div className=" text-sm bg-[#ffff]">
                           {assets.map(

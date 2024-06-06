@@ -1,5 +1,5 @@
 import legacy from "../contracts/legacy";
-import { AssetMap } from "../assetMap";
+import { AssetMap } from "../utility/assetMap";
 import { Horizon, Transaction, XdrLargeInt ,scValToNative,scValToBigInt,rpc} from "@stellar/stellar-sdk";
 import { getPublicKey, signTransaction } from "@stellar/freighter-api";
 import { useEffect, useState } from "react";

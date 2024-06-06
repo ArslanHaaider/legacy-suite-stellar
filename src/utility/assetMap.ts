@@ -1,5 +1,5 @@
 import { contract } from "@stellar/stellar-sdk";
-import { AssetMapType } from "./components/types/benificiary";
+import { AssetMapType } from "../components/types/benificiary";
 
 export const    AssetMap:AssetMapType = {
     "USDC":{

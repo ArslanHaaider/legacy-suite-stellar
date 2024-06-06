@@ -12,7 +12,7 @@ import {
   Asset,
 } from "@stellar/stellar-sdk";
 import { getPublicKey } from "@stellar/freighter-api";
-import { AssetMap } from "../assetMap";
+import { AssetMap } from "../utility/assetMap";
 import { ValueItem, AssetType, Codes } from "./types/benificiary";
 const Claimed = () => {
   let data;
