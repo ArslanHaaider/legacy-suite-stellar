@@ -1,13 +1,9 @@
 import "../src/init.js"
-import { useState ,useEffect} from 'react'
 "@stellar/stellar-sdk"
-import User from "./components/User.js"
 import "./index.css"
-import Dashboard from "./components/UnClaimed.js"
-import Benificiary from "./components/Benificiary.js"
-import { rpc ,scValToNative} from "@stellar/stellar-sdk";
+import { rpc } from "@stellar/stellar-sdk";
 import FreighterComponent from "./components/ConnectFreighter.js"
-import { Link, Outlet, useNavigate } from "react-router-dom"
+import {Outlet, useNavigate } from "react-router-dom"
 // import { PrismaClient } from "@prisma/client";
 function App() {
   const server = new rpc.Server("https://soroban-testnet.stellar.org");

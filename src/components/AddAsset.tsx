@@ -45,6 +45,7 @@ const AddAsset = () => {
       // let amountLimit = parseInt(account.balances[0].balance);
       // console.log(account.balances);
       console.log(data.balances)
+      // @ts-ignore
       setBalance(data.balances);
       // console.log(process.env.CONTRACTADDRESS)
     };
@@ -245,7 +246,9 @@ const AddAsset = () => {
             </>
           )
         })}
-      <div className="w-11/12 border h-1/6 sticky bottom-0 flex text-2xl ml-2 font-bold justify-evenly items-center bg-[#FFFFFF] rounded-md  border-[#EFF0F1]">Add Asset To Your Will <button className="bg-button p-2 rounded-md h-1/2 text-lg btn btn-info" onClick={()=> document.getElementById('my_modal_1').showModal()}>Add Asset</button> </div>
+
+      {// @ts-ignore
+        <div className="w-11/12 border h-1/6 sticky bottom-0 flex text-2xl ml-2 font-bold justify-evenly items-center bg-[#FFFFFF] rounded-md  border-[#EFF0F1]">Add Asset To Your Will <button className="bg-button p-2 rounded-md h-1/2 text-lg btn btn-info" onClick={()=> document.getElementById('my_modal_1').showModal()}>Add Asset</button> </div> }
 <dialog id="my_modal_1" className="modal">
   <div className="modal-box min-w-[50rem] bg-[#ffff]">
   <div className="min-w-[40rem] min-h-[25rem] max-w-full max-h-full flex flex-col justify-between items-center rounded-md p-4 space-y-4 bg-[#ffff]">
