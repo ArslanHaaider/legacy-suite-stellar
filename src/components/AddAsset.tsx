@@ -1,25 +1,18 @@
-import legacy from "../contracts/legacy";
+
 import { AssetMap } from "../utility/assetMap";
-import { Horizon, Transaction, XdrLargeInt ,scValToNative,scValToBigInt,rpc} from "@stellar/stellar-sdk";
+import { Horizon, Transaction, XdrLargeInt,rpc} from "@stellar/stellar-sdk";
 import { getPublicKey, signTransaction } from "@stellar/freighter-api";
-import { useEffect, useState } from "react";
+import { ReactEventHandler, useEffect, useState } from "react";
 import { Address } from "@stellar/stellar-sdk";
 import { legacyContract } from "../../contractClass";
-import axios from "axios";
 import {
   BASE_FEE,
-  Contract,
   Networks,
-  ScInt,
-  StrKey,
-  SorobanRpc,
   TransactionBuilder,
-  nativeToScVal,
   xdr,
-  Account,
 } from "@stellar/stellar-sdk";
-import { PrismaClient } from "@prisma/client";
-import { env } from "process";
+// import { PrismaClient } from "@prisma/client";
+// import { env } from "process";
 
 interface Balance {
   asset_code: string;
@@ -64,13 +57,13 @@ const AddAsset = () => {
     console.log(assets)
   };
 
-  const handleAmount = (index, e) => {
+  const handleAmount = (index:number, e) => {
     const newAssets = [...assets];
     newAssets[index].amount = e.target.value;
     setAssets(newAssets);
   };
 
-  const handleBenificaryAddress = (e) => {
+  const handleBenificaryAddress = (e:React.ChangeEvent<HTMLInputElement>) => {
     setBenificiaryAddress(e.target.value);
   };
 
@@ -79,7 +72,7 @@ const AddAsset = () => {
     console.log(assets);
   };
 
-  const removeAssetSection = (index) => {
+  const removeAssetSection = (index:number) => {
     const newAssets = [...assets];
     newAssets.splice(index, 1);
     setAssets(newAssets);
@@ -158,11 +151,15 @@ const AddAsset = () => {
         setLoading(false)
       }
       else{
+      console.log(send.diagnosticEvents);
         setAlert({
           visible: true,
           type: 'error',
           message: 'Error! Your transaction failed.',
         });
+        setAssets([{ asset: "", amount: "" }])
+        setBenificiaryAddress('');
+        setLoading(false)
       }
       // try{
       //   let  data = await server.getEvents({
@@ -248,7 +245,7 @@ const AddAsset = () => {
             </>
           )
         })}
-      <div className="w-11/12 border h-1/6 sticky bottom-0 flex text-2xl ml-2 font-bold justify-evenly items-center bg-[#FFFFFF] rounded-md  border-[#EFF0F1]">Add Asset To Your Will <button className="bg-button p-2 rounded-md h-1/2 text-lg btn btn-info" onClick={()=>document.getElementById('my_modal_1').showModal()}>Add Asset</button> </div>
+      <div className="w-11/12 border h-1/6 sticky bottom-0 flex text-2xl ml-2 font-bold justify-evenly items-center bg-[#FFFFFF] rounded-md  border-[#EFF0F1]">Add Asset To Your Will <button className="bg-button p-2 rounded-md h-1/2 text-lg btn btn-info" onClick={()=> document.getElementById('my_modal_1').showModal()}>Add Asset</button> </div>
 <dialog id="my_modal_1" className="modal">
   <div className="modal-box min-w-[50rem] bg-[#ffff]">
   <div className="min-w-[40rem] min-h-[25rem] max-w-full max-h-full flex flex-col justify-between items-center rounded-md p-4 space-y-4 bg-[#ffff]">

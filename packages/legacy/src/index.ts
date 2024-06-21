@@ -32,7 +32,7 @@ if (typeof window !== 'undefined') {
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CBARWMQEQYQOFJRKVOTPUYC5CGHZOIMHGE6D63RRJBVRWQ2DYW6VJWYT",
+    contractId: "CDDI5NCWOTOYY2ZAP3QBM7WTSH6R5CNQYRJWXGCI6D2BS77YFWGJ43B2",
   }
 } as const
 
@@ -149,6 +149,26 @@ export interface Client {
     simulate?: boolean;
   }) => Promise<AssembledTransaction<boolean>>
 
+  /**
+   * Construct and simulate a test_approval transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  test_approval: ({token_address, from, amount}: {token_address: string, from: string, amount: i128}, options?: {
+    /**
+     * The fee to pay for the transaction. Default: BASE_FEE
+     */
+    fee?: number;
+
+    /**
+     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+     */
+    timeoutInSeconds?: number;
+
+    /**
+     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+     */
+    simulate?: boolean;
+  }) => Promise<AssembledTransaction<null>>
+
 }
 export class Client extends ContractClient {
   constructor(public readonly options: ContractClientOptions) {
@@ -160,7 +180,8 @@ export class Client extends ContractClient {
         "AAAAAAAAAAAAAAAJYWRkX2FkbWluAAAAAAAAAQAAAAAAAAAMYWRtaW5fYWRyZXNzAAAD7gAAACAAAAAA",
         "AAAAAAAAAAAAAAASYWRkX211bHRpcGxlX2Fzc2V0AAAAAAACAAAAAAAAAARkYXRhAAAD6gAAB9AAAAAKQmVuaWZpY2FyeQAAAAAAAAAAAARmcm9tAAAAEwAAAAA=",
         "AAAAAAAAAAAAAAALY2xhaW1fYXNzZXQAAAAABQAAAAAAAAAEZnJvbQAAABMAAAAAAAAAB2NsYWltZXIAAAAAEwAAAAAAAAAHbWVzc2FnZQAAAAAOAAAAAAAAAAdhZGRyZXNzAAAAA+4AAAAgAAAAAAAAAAlzaWduYXR1cmUAAAAAAAPuAAAAQAAAAAA=",
-        "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ==" ]),
+        "AAAAAAAAAAAAAAAPdGVzdF9hZG1pbl9zaWduAAAAAAAAAAABAAAAAQ==",
+        "AAAAAAAAAAAAAAANdGVzdF9hcHByb3ZhbAAAAAAAAAMAAAAAAAAADXRva2VuX2FkZHJlc3MAAAAAAAATAAAAAAAAAARmcm9tAAAAEwAAAAAAAAAGYW1vdW50AAAAAAALAAAAAA==" ]),
       options
     )
   }
@@ -168,6 +189,7 @@ export class Client extends ContractClient {
     add_admin: this.txFromJSON<null>,
         add_multiple_asset: this.txFromJSON<null>,
         claim_asset: this.txFromJSON<null>,
-        test_admin_sign: this.txFromJSON<boolean>
+        test_admin_sign: this.txFromJSON<boolean>,
+        test_approval: this.txFromJSON<null>
   }
 }
