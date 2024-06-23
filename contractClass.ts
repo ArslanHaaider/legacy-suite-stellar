@@ -1,5 +1,5 @@
 import { Address, Contract, contract } from "@stellar/stellar-sdk";
-import { i128 } from "./packages/legacy/src";
+import { i128 } from "@stellar/stellar-sdk/contract";
 // import { Benificary } from './packages/legacy';
 const { Spec } = contract;
 

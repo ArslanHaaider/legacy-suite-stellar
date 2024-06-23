@@ -175,11 +175,11 @@ export class Client extends ContractClient {
       options
     )
   }
-  public readonly fromJSON = {
-    add_admin: this.txFromJSON<null>,
-        add_multiple_asset: this.txFromJSON<null>,
-        claim_asset: this.txFromJSON<null>,
-        test_admin_sign: this.txFromJSON<boolean>,
-        test_approval: this.txFromJSON<null>
-  }
+  // public readonly fromJSON = {
+  //   add_admin: this.txFromJSON<null>,
+  //       add_multiple_asset: this.txFromJSON<null>,
+  //       claim_asset: this.txFromJSON<null>,
+  //       test_admin_sign: this.txFromJSON<boolean>,
+  //       test_approval: this.txFromJSON<null>
+  // }
 }
