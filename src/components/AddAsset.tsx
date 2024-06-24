@@ -96,7 +96,7 @@ const AddAsset = () => {
           "i128",
           parseInt(assetEntry.amount) * 10000000
         ).toBigInt(),
-      };
+      };  
     });
     
     console.log(data)
@@ -139,6 +139,7 @@ const AddAsset = () => {
       new Transaction(txEnvelope, Networks.TESTNET)
     );
     const latesLedgerValue = send.latestLedger;
+    console.log(send.hash);
     setTimeout(async()=>{
       const Result = await server.getTransaction(send.hash);
       if(Result.status == "SUCCESS"){

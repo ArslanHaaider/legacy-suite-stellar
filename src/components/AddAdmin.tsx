@@ -29,6 +29,7 @@ import AddAsset from "./AddAsset";
     const contractAddress =
     import.meta.env.VITE_CONTRACTADDRESS;
     const adminData  = await getAdminData();
+    console.log(adminData);
     const adminAddres = new Address(adminData[2]);
     console.log(adminAddres.toString())
     console.log(adminAddres.toBuffer())

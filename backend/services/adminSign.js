@@ -5,14 +5,13 @@ module.exports = {
     adminSign: async(req,res)=>{
         try{
             const adminKeyPair =  Keypair.fromSecret("SBI5Z6W3KXYQ4Z556WB77E5DWUQGQHZWV37BGMF2BBWQWO4ERULIGK5J");
-
             const server = new SorobanRpc.Server(
                 "https://soroban-testnet.stellar.org:443",
               );
             
               // Here we will use a deployed instance of the `increment` example contract.
               const contractAddress =
-                "CDI4ZCDFKSP2EYIBGRU376XXSEAMZZBJLZGTSNKLGGAAMTVPTC6F34N2";
+                "CDBOZEPIDZGWN3TUJLJKFBZLFN6TKYYJGKUKWTTAXC4IEMTO6SAK6JF2";
               const contract = new Contract(contractAddress);
             
               // Transactions require a valid sequence number (which varies from one

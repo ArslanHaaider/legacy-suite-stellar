@@ -16,7 +16,7 @@ const User = () => {
         <div className="w-full h-[100vh] ">
           {/* <h1 className="text-lg font-bold text-center uppercase">Add assets for benificary</h1>     */}
           <AddAsset/>
-          {/* <AddAdmin/> */}
+          <AddAdmin/>
         </div>  
         
   );

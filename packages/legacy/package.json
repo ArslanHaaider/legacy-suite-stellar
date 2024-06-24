@@ -7,7 +7,6 @@
         "@stellar/stellar-sdk": "11.3.0"
     },
     "scripts": {
-        "build": "node ./scripts/build.mjs"
     },
     "exports": {
         "require": "./dist/cjs/index.js",

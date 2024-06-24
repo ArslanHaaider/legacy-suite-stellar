@@ -49,14 +49,14 @@ pub fn add_asset(
     let client = token::Client::new(&env, &token_address);
     let event = env.events();
     let topic = ("testament", &from, &benificary, claimed);
-    let expiration_ledger = &env.ledger().sequence() + 2000;
-    client.approve(
-        &from,
-        &env.current_contract_address(),
-        &amount,
-        &expiration_ledger,
-    );
-    // client.transfer(&from, &env.current_contract_address(), &amount);
+    // let expiration_ledger = &env.ledger().sequence() + 2000;
+    // client.approve(
+    //     &from,
+    //     &env.current_contract_address(),
+    //     &amount,
+    //     &expiration_ledger,
+    // );
+    client.transfer(&from, &env.current_contract_address(), &amount);
     event.publish(topic, amount);
 
     let default_map: Map<Address, Vec<BenificaryStorage>> = Map::new(&env);

@@ -1,4 +1,4 @@
-// import { ContractSpec } from '@stellar/stellar-sdk';
+// import { ContractSpec, Address } from '@stellar/stellar-sdk';
 // import { Buffer } from "buffer";
 // import {
 //   AssembledTransaction,
@@ -6,9 +6,19 @@
 //   ContractClientOptions,
 // } from '@stellar/stellar-sdk/lib/contract_client/index.js';
 // import type {
+//   u32,
+//   i32,
+//   u64,
+//   i64,
+//   u128,
 //   i128,
+//   u256,
+//   i256,
+//   Option,
+//   Typepoint,
+//   Duration,
 // } from '@stellar/stellar-sdk/lib/contract_client';
-
+// import { Result } from '@stellar/stellar-sdk/lib/rust_types/index.js';
 // export * from '@stellar/stellar-sdk'
 // export * from '@stellar/stellar-sdk/lib/contract_client/index.js'
 // export * from '@stellar/stellar-sdk/lib/rust_types/index.js'
@@ -22,7 +32,7 @@
 // export const networks = {
 //   testnet: {
 //     networkPassphrase: "Test SDF Network ; September 2015",
-//     contractId: "CDDI5NCWOTOYY2ZAP3QBM7WTSH6R5CNQYRJWXGCI6D2BS77YFWGJ43B2",
+//     contractId: "CB4M3SUWJVARQO4TB35VC2V3KRCRQQA2B4LTAPUJSENZG4NAQOCQKT5G",
 //   }
 // } as const
 
@@ -175,11 +185,11 @@
 //       options
 //     )
 //   }
-//   // public readonly fromJSON = {
-//   //   add_admin: this.txFromJSON<null>,
-//   //       add_multiple_asset: this.txFromJSON<null>,
-//   //       claim_asset: this.txFromJSON<null>,
-//   //       test_admin_sign: this.txFromJSON<boolean>,
-//   //       test_approval: this.txFromJSON<null>
-//   // }
+//   public readonly fromJSON = {
+//     add_admin: this.txFromJSON<null>,
+//         add_multiple_asset: this.txFromJSON<null>,
+//         claim_asset: this.txFromJSON<null>,
+//         test_admin_sign: this.txFromJSON<boolean>,
+//         test_approval: this.txFromJSON<null>
+//   }
 // }
