@@ -133,8 +133,9 @@ const AddAsset = () => {
         networkPassphrase: Networks.TESTNET,
       }
     );
+   
     const txEnvelope = xdr.TransactionEnvelope.fromXDR(transaction, "base64");
-    console.log(txEnvelope)
+    console.log(txEnvelope.toXDR('base64'));
     const send = await server.sendTransaction(
       new Transaction(txEnvelope, Networks.TESTNET)
     );
@@ -153,7 +154,7 @@ const AddAsset = () => {
         setLoading(false)
       }
       else{
-      console.log(send.diagnosticEvents);
+      console.log(send.diagnosticEvents); 
         setAlert({
           visible: true,
           type: 'error',
