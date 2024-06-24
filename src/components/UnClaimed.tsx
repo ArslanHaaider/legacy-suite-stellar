@@ -127,7 +127,7 @@ const UnClaimed = () => {
   const getAdminData = async () => {
     try {
       const adminData = await axios.get("/admin/Sign", {
-        baseURL: "http://localhost:3000",
+        baseURL:import.meta.env.VITE_BACKEND,
       });
       // console.log(adminData.data);
       return adminData.data;
