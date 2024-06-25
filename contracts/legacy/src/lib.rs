@@ -68,7 +68,7 @@ pub fn add_asset(
         .storage()
         .persistent()
         .get(&BENI)
-        .unwrap_or(default_asset);
+        .unwrap_or(default_asset);  
 
     let mut benificary_assets: Vec<BenificaryStorage> =
         will_map.get(benificary.clone()).unwrap_or(vec![&env]);

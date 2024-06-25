@@ -15,12 +15,25 @@ import {
   Contract,
   Asset,
   Operation,
+  Horizon
 } from "@stellar/stellar-sdk";
 import { useEffect, useState } from "react";
 import { legacyContract } from "../../contractClass";
 import axios from "axios";
 import { AssetMap } from "../utility/assetMap";
 import { AssetType, Codes, ValueItem } from "./types/benificiary";
+interface Balance {
+  asset_code: string;
+  asset_issuer: string;
+  asset_type: string;
+  balance: string;
+  buyinsetAssetsg_liabilities: string;
+  is_authorized: boolean;
+  is_authorized_to_maintain_liabilities: boolean;
+  last_modified_ledger: number;
+  limit: string;
+  selling_liabilities: string;
+}
 const UnClaimed = () => {
   let data;
   const [loading, setLoading] = useState(false);
@@ -28,6 +41,22 @@ const UnClaimed = () => {
   let [values, setValues] = useState<AssetType[]>([]);
   const [assetCodes, setAssetCodes] = useState<Codes>({});
   const [assetCodes2, setAssetCodes2] = useState<Codes>({});
+  const [balance,setBalance ] = useState<Array<Balance>>();
+  useEffect(() => {
+    const accountInfo = async () => {
+      const server = new Horizon.Server("https://horizon-testnet.stellar.org/", {
+      });
+      const publicKey = await getPublicKey();
+      let data  = await server.loadAccount(publicKey);
+      // let amountLimit = parseInt(account.balances[0].balance);
+      // console.log(account.balances);
+      console.log("printing balances",data.balances)
+      // @ts-ignore
+      setBalance(data.balances);
+      // console.log(process.env.CONTRACTADDRESS)
+    };
+    accountInfo();
+  }, []);
   useEffect(() => {
     const fetchAssets = async () => {
       const server = new rpc.Server("https://soroban-testnet.stellar.org:443", {
@@ -48,8 +77,9 @@ const UnClaimed = () => {
         value: item[2],
         claimed: item[3],
       }));
-      console.log(value);
+      console.log("printing value",value);
       setValues(result);
+      console.log(result);
     };
     fetchAssets();
     // console.log(values[]);
@@ -68,11 +98,11 @@ const UnClaimed = () => {
         }
       }
       setAssetCodes2(codes2);
-      console.log(codes2);
+      console.log("printing codes2",codes2);
       setAssetCodes(codes);
-      // console.log(codes)
+      console.log("printing codes",codes)
       setLoading(false);
-      console.log(loading);
+      // console.log(loading);
     };
 
     if (values.length > 0) {
@@ -171,45 +201,51 @@ const UnClaimed = () => {
     const sourceAccount = await server.getAccount(publicKey);
 
     for (let keys in assetCodes2) {
-      console.log(assetCodes2);
-      const newAsset = new Asset(assetCodes2[keys], keys);
-      let trustLineTransaction = new TransactionBuilder(sourceAccount, {
-        fee: BASE_FEE,
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          Operation.changeTrust({
-            asset: newAsset,
-            source: sourceAccount.accountId(),
-          })
-        )
-        .setTimeout(300)
-        .build();
-      const transaction = await signTransaction(
-        trustLineTransaction.toEnvelope().toXDR("base64"),
-        {
+      let trustExist = balance.some(balance => balance.asset_issuer = keys);
+      console.log("Priting the value of the trust exist",trustExist)
+      if(!trustExist){
+        const newAsset = new Asset(assetCodes2[keys], keys);
+        let trustLineTransaction = new TransactionBuilder(sourceAccount, {
+          fee: BASE_FEE,
           networkPassphrase: Networks.TESTNET,
-        }
-      );
-      const txEnvelope = xdr.TransactionEnvelope.fromXDR(transaction, "base64");
-      const send = await server.sendTransaction(
-        new Transaction(txEnvelope, Networks.TESTNET)
-      );
-      console.log(send.status);
+        })
+          .addOperation(
+            Operation.changeTrust({
+              asset: newAsset,
+              source: sourceAccount.accountId(),
+            })
+          )
+          .setTimeout(300)
+          .build();
+        const transaction = await signTransaction(
+          trustLineTransaction.toEnvelope().toXDR("base64"),
+          {
+            networkPassphrase: Networks.TESTNET,
+          }
+        );
+        const txEnvelope = xdr.TransactionEnvelope.fromXDR(transaction, "base64");
+        const send = await server.sendTransaction(
+          new Transaction(txEnvelope, Networks.TESTNET)
+        );
+        console.log(send.status);
+      }
+      else{
+        console.log("trutline already exist");
+      }
+     
     }
 
     try {
       const builtTransaction = new TransactionBuilder(sourceAccount, {
         fee: BASE_FEE,
-        networkPassphrase: Networks.TESTNET,
+        networkPassphrase: Networks.TESTNET,  
       })
         .addOperation(operation)
-        .setTimeout(10000)
+        .setTimeout(300)
         .build();
       console.log("before simu");
       const simulatedTx = await server.simulateTransaction(builtTransaction);
       console.log("before assebmled");
-
       const assembledTx = SorobanRpc.assembleTransaction(
         builtTransaction,
         simulatedTx
@@ -221,16 +257,31 @@ const UnClaimed = () => {
         }
       );
       const txEnvelope = xdr.TransactionEnvelope.fromXDR(transaction, "base64");
+      console.log(txEnvelope.toXDR("base64"));
       const send = await server.sendTransaction(
         new Transaction(txEnvelope, Networks.TESTNET)
       );
       console.log(send.hash);
-      setAlert({
-        visible: true,
-        type: "Success",
-        message: "You transacton was successfull.",
-      });
+      setTimeout(async()=>{
+        const Result = await server.getTransaction(send.hash);
+      if(Result.status == "SUCCESS"){
       setLoading(false);
+        setAlert({
+          visible: true,
+          type: "Success",
+          message: "You transacton was successfull.",
+        });
+      }
+      else{
+        console.log(Result.status);
+        setLoading(false);
+        setAlert({
+          visible: true,
+          type: "error",
+          message: "Error! Your transaction failed.",
+        });
+      }
+      },6000)
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -254,7 +305,7 @@ const UnClaimed = () => {
       : {};
 
   const unClaimed = Object.values(groupedByAddress);
-  console.log(unClaimed[1], "Printing unclaimed setting");
+  // console.log(unClaimed[1], "Printing unclaimed setting");
   return (
     <>
       <div className="min-h-screen flex bg-[#ffff] font-sans">

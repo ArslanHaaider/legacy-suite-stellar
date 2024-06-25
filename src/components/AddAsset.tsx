@@ -44,7 +44,7 @@ const AddAsset = () => {
       let data  = await server.loadAccount(publicKey);
       // let amountLimit = parseInt(account.balances[0].balance);
       // console.log(account.balances);
-      console.log(data.balances)
+      console.log("printing balances",data.balances)
       // @ts-ignore
       setBalance(data.balances);
       // console.log(process.env.CONTRACTADDRESS)
