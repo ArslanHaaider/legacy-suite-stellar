@@ -22,6 +22,7 @@ import { legacyContract } from "../../contractClass";
 import axios from "axios";
 import { AssetMap } from "../utility/assetMap";
 import { AssetType, Codes, ValueItem } from "./types/benificiary";
+import { resolve } from "path";
 interface Balance {
   asset_code: string;
   asset_issuer: string;
@@ -199,10 +200,11 @@ const UnClaimed = () => {
       new Uint8Array(signatures.data)
     );
     const sourceAccount = await server.getAccount(publicKey);
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     for (let keys in assetCodes2) {
-      let trustExist = balance.some(balance => balance.asset_issuer = keys);
-      console.log("Priting the value of the trust exist",trustExist)
+      let trustExist = balance.some(balance => balance.asset_code == assetCodes2[keys]);
+      console.log("Priting the value of the trust exist",trustExist,keys)
       if(!trustExist){
         const newAsset = new Asset(assetCodes2[keys], keys);
         let trustLineTransaction = new TransactionBuilder(sourceAccount, {
@@ -227,12 +229,11 @@ const UnClaimed = () => {
         const send = await server.sendTransaction(
           new Transaction(txEnvelope, Networks.TESTNET)
         );
-        console.log(send.status);
+        await delay(5000);
       }
       else{
         console.log("trutline already exist");
       }
-     
     }
 
     try {
