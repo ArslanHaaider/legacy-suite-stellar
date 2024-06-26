@@ -38,6 +38,7 @@ interface Balance {
 const UnClaimed = () => {
   let data;
   const [loading, setLoading] = useState(false);
+  const [loading2,setLoading2] = useState(false);
   const [alert, setAlert] = useState({ visible: false, type: "", message: "" });
   let [values, setValues] = useState<AssetType[]>([]);
   const [assetCodes, setAssetCodes] = useState<Codes>({});
@@ -89,6 +90,7 @@ const UnClaimed = () => {
   useEffect(() => {
     const fetchAssetCodes = async () => {
       setLoading(true);
+      setLoading2(true)
       const codes: Codes = {};
       const codes2: Codes = {};
       for (const asset of values) {
@@ -103,6 +105,7 @@ const UnClaimed = () => {
       setAssetCodes(codes);
       console.log("printing codes",codes)
       setLoading(false);
+      setLoading2(false)
       // console.log(loading);
     };
 
@@ -229,8 +232,8 @@ const UnClaimed = () => {
         const send = await server.sendTransaction(
           new Transaction(txEnvelope, Networks.TESTNET)
         );
-        await delay(5000);
-      }
+        await delay(4000);
+      } 
       else{
         console.log("trutline already exist");
       }
@@ -330,7 +333,7 @@ const UnClaimed = () => {
                             (asset, id) =>
                               !asset.claimed && (
                                 <div key={id} className="unclaimed-asset flex">
-                                  {loading ? (
+                                  {loading2 ? (
                                     "Loading..."
                                   ) : (
                                     <>
@@ -347,7 +350,7 @@ const UnClaimed = () => {
                                       <div className="text-lg">
                                         <p>
                                           Token:
-                                          {loading
+                                          {loading2
                                             ? "Loading ..."
                                             : [assetCodes[asset.token]]}
                                         </p>
